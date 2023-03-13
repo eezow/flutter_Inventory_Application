@@ -98,6 +98,57 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLandscape(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Show chart'),
+          Switch(
+              value: _showChart,
+              onChanged: ((value) {
+                setState(() {
+                  _showChart = value;
+                });
+              })),
+        ],
+      ),
+      _showChart
+          ? Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(recentTransaction: _recentTransactions))
+          : txListWidget
+    ];
+  }
+
+  List<Widget> _buildPotraitContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Container(
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
+              0.3,
+          child: Chart(recentTransaction: _recentTransactions)),
+      txListWidget
+    ];
+  }
+
+  Widget _buildAppBar() {
+    return AppBar(
+      title: Text('Personal Expenses'),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () => _startNewtransaction(context),
+            icon: Icon(Icons.add))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -113,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final txListWidget = Container(
         height: (mediaQuery.size.height -
-                appBar.preferredSize.height -
+                (appBar as PreferredSizeWidget).preferredSize.height -
                 mediaQuery.padding.top) *
             0.7,
         child: TransactionList(_userTransactions, deleteTransaction));
@@ -125,37 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('Show chart'),
-                  Switch(
-                      value: _showChart,
-                      onChanged: ((value) {
-                        setState(() {
-                          _showChart = value;
-                        });
-                      })),
-                ],
-              ),
+              ..._buildLandscape(mediaQuery, appBar, txListWidget),
             if (!isLandscape)
-              Container(
-                  height: (mediaQuery.size.height -
-                          appBar.preferredSize.height -
-                          mediaQuery.padding.top) *
-                      0.3,
-                  child: Chart(recentTransaction: _recentTransactions)),
-            if (!isLandscape) txListWidget,
-
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(recentTransaction: _recentTransactions))
-                  : txListWidget
+              ..._buildPotraitContent(mediaQuery, appBar, txListWidget),
 
             //this is the input AREA
 
